@@ -62,7 +62,7 @@ if $doSetup ; then
     chmod 700 ~/.ssh 
     chmod 600 ~/.ssh/authorized_keys 
     chown -R root.root .ssh
-    echo -e "\n\nPermitRootLogin no\n#PasswordAuthentication no\nUserDNS no\nAllowUsers dailysleaze" >> /etc/ssh/sshd_config
+    echo -e "\n\nPermitRootLogin no\n#PasswordAuthentication no\nUseDNS no\nAllowUsers dailysleaze" >> /etc/ssh/sshd_config
     sed -i "s/Port 22/Port $sshPort/g" /etc/ssh/sshd_config
 
     #Add user as admin
@@ -105,11 +105,14 @@ if $doWebServer ; then
     # http://www.howtoforge.com/installing-nginx-with-php5-and-php-fpm-and-mysql-support-lemp-on-ubuntu-12.04-lts
     #sudo add-apt-repository -y ppa:git-core/ppa
     sudo apt-get update
-    sudo apt-get -y purge apache2* libapache2*
-    sudo apt-get -y install apache2 php5 php5-cli 
-    #mysql-server mysql-client php5-fpm php5-mysql php5-gd php5-mcrypt php5-memcache php-apc php5-curl curl 
+    sudo apt-get -y purge apache2* libapache2*    
+    sudo apt-get -y install apache2 curl git php5 php5-cli php5-gd php5-mcrypt php5-mysql mysql-server mysql-client
+    # php5-fpm  php5-memcache php-apc php5-curl
     #sudo apt-get -y install php5-suhosin php5-intl php-pear php5-imap php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl
     #nano /etc/php5/cli/conf.d/ming.ini # change "#" to ";"
+
+    #Apache disable modules
+    sudo a2dismod autoindex
 
     # fix up some configs
     #sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
@@ -140,6 +143,10 @@ if $doWebServer ; then
     #TBC Git
     #git config --global user.name "your github username"
     #git config --global user.email "you@youremail.com"
+
+    #TBC COmposer
+    #curl -sS https://getcomposer.org/installer | php
+    #sudo mv composer.phar /usr/local/bin/composer
 
     # set up data dir
     #mkdir -p /data/sites /data/logs
