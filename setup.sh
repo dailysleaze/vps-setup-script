@@ -9,7 +9,7 @@ email=""
 pubkey=""
 
 # ssh port
-sshPort="17942"
+sshPort="657"
 
 # setup
 doSetup=true
@@ -62,16 +62,38 @@ if $doSetup ; then
     chmod 700 ~/.ssh 
     chmod 600 ~/.ssh/authorized_keys 
     chown -R root.root .ssh
-    echo -e "\n\nPermitRootLogin no\nPasswordAuthentication no\n#AllowUsers dailysleaze" >> /etc/ssh/sshd_config
+    echo -e "\n\nPermitRootLogin no\n#PasswordAuthentication no\nUserDNS no\nAllowUsers dailysleaze" >> /etc/ssh/sshd_config
     sed -i "s/Port 22/Port $sshPort/g" /etc/ssh/sshd_config
 
-    # fail2ban
-    sudo apt-get -y install fail2ban
-    #sed -i "s/--output mail/--output mail --mailto $email --detail high/g" /etc/cron.daily/00logwatch
+    #Add user as admin
+    visudo
 
+    #Restart in the event of memory peak
+    echo -e "\n\nvm.panic_on_oom=1\nkernel.panic=10" >> /etc/sysctl.conf
+
+    #Firewall
+    sudo apt-get install nmap
+    nmap -v -sT localhost
+    sudo ufw default deny incoming
+    sudo ufw default allow outgoing
+    sudo ufw logging on
+    sudo ufw allow ssh/tcp
+    sudo ufw allow http/tcp
+    sudo ufw allow 443
+    sudo ufw allow $sshPort
+    sudo ufw enable
+    sudo ufw status
+
+    # fail2ban
+    sudo apt-get -y install fail2ban    
+    sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+    echo -e "destemail = willmather43@hotmail.com\naction = %(action_mwl)s\n\n[ssh]\n\nenabled  = true\nport     = $sshPort\nfilter   = sshd\nlogpath  = /var/log/auth.log\nmaxretry = 6\n\n[ssh-ddos]\n\nenabled  = true\nport     = $sshPort\nfilter   = sshd-ddos\nlogpath  = /var/log/auth.log\nmaxretry = 6" >> /etc/fail2ban/jail.local
+    
     # restart ssh and fail2ban services
     service ssh restart
     service fail2ban restart
+
+    echo -e "order bind,hosts\nnospoof on" >> /etc/host.conf
 
     # empty out mail file
     cat /dev/null > /var/mail/root
@@ -84,28 +106,26 @@ if $doWebServer ; then
     #sudo add-apt-repository -y ppa:git-core/ppa
     sudo apt-get update
     sudo apt-get -y purge apache2* libapache2*
-    sudo apt-get -y install git php5 php5-cli mysql-server mysql-client php5-fpm php5-mysql php5-gd php5-mcrypt php5-memcache php-apc php5-curl curl 
+    sudo apt-get -y install apache2 php5 php5-cli 
+    #mysql-server mysql-client php5-fpm php5-mysql php5-gd php5-mcrypt php5-memcache php-apc php5-curl curl 
     #sudo apt-get -y install php5-suhosin php5-intl php-pear php5-imap php5-ming php5-ps php5-pspell php5-recode php5-snmp php5-sqlite php5-tidy php5-xmlrpc php5-xsl
     #nano /etc/php5/cli/conf.d/ming.ini # change "#" to ";"
 
     # fix up some configs
-    sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
+    #sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
 
-    # set up nginx
-    #mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
-    #mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
-    #rm /etc/nginx/sites-enabled/default
-    #wget https://raw.github.com/amnah/vps-setup-script/master/files/nginx.conf  -O /etc/nginx/nginx.conf
-    #wget https://raw.github.com/amnah/vps-setup-script/master/files/sites-available/_baseApps -O /etc/nginx/sites-available/_baseApps
-    #wget https://raw.github.com/amnah/vps-setup-script/master/files/sites-available/_common -O /etc/nginx/sites-available/_common
+    #Apache configuration
+    sed -i "s/Timeout 300/Timeout 30/g" /etc/apache2/apache2.conf
+    #TBC - Change to deny from all
+    #sed -i "s/Alloow /Timeout 30/g" /etc/apache2/apache2.conf
 
-    # set up data dir
-    #mkdir -p /data/sites /data/logs
-    #ln -s /etc/nginx/nginx.conf /data/nginx.conf
-    #ln -s /etc/nginx/sites-available/ /data
-    #ln -s /etc/nginx/sites-enabled/ /data
-    #ln -s /etc/nginx/sites-available/_baseApps /etc/nginx/sites-enabled/_baseApps
-    #wget https://raw.github.com/amnah/vps-setup-script/master/files/example.site -O /data/example.site
+
+    #TBC MYSQL
+    #sudo apt-get install mysql-server mysql-client
+
+
+    #TBC phpMyAdmin
+    #sudo apt-get install phpmyadmin
 
     # download and install/move phpMyAdmin
     # note: file gets named "download"
@@ -115,6 +135,21 @@ if $doWebServer ; then
     #mv phpMyAdmin* /data
     #ln -s /data/phpMyAdmin* /data/phpMyAdmin
     #wget https://raw.github.com/amnah/vps-setup-script/master/files/config.inc.php -O /data/phpMyAdmin/config.inc.php
+
+
+    #TBC Git
+    #git config --global user.name "your github username"
+    #git config --global user.email "you@youremail.com"
+
+    # set up data dir
+    #mkdir -p /data/sites /data/logs
+    #ln -s /etc/nginx/nginx.conf /data/nginx.conf
+    #ln -s /etc/nginx/sites-available/ /data
+    #ln -s /etc/nginx/sites-enabled/ /data
+    #ln -s /etc/nginx/sites-available/_baseApps /etc/nginx/sites-enabled/_baseApps
+    #wget https://raw.github.com/amnah/vps-setup-script/master/files/example.site -O /data/example.site
+
+    
 
     # setup default + phpMyAdmin logs in nginx
     #mkdir /data/logs/_
