@@ -74,13 +74,13 @@ if $doSetup ; then
     #TBC Firewall
     sudo apt-get install nmap
     nmap -v -sT localhost
-    sudo ufw default deny incoming
-    sudo ufw default allow outgoing
-    sudo ufw logging on
+    #sudo ufw default deny incoming
+    #sudo ufw default allow outgoing
+    #sudo ufw logging on
     #sudo ufw allow ssh/tcp
-    sudo ufw allow http/tcp
-    sudo ufw allow 443
-    sudo ufw allow $sshPort/tcp
+    #sudo ufw allow http/tcp
+    #sudo ufw allow 443
+    #sudo ufw allow $sshPort/tcp
     #sudo ufw enable
     #sudo ufw status
 
