@@ -36,7 +36,7 @@ if $doSetup ; then
 
     # nano + other apps for add-apt-repository cmd
     # http://stackoverflow.com/a/16032073
-    sudo apt-get -y install nano
+    sudo apt-get -y install nano ufw
     #WM python-software-properties software-properties-common
 
     # update time
