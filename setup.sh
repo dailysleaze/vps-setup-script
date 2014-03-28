@@ -71,18 +71,18 @@ if $doSetup ; then
     #Restart in the event of memory peak
     echo -e "\n\nvm.panic_on_oom=1\nkernel.panic=10" >> /etc/sysctl.conf
 
-    #Firewall
+    #TBC Firewall
     sudo apt-get install nmap
     nmap -v -sT localhost
     sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw logging on
-    sudo ufw allow ssh/tcp
+    #sudo ufw allow ssh/tcp
     sudo ufw allow http/tcp
     sudo ufw allow 443
-    sudo ufw allow $sshPort
-    sudo ufw enable
-    sudo ufw status
+    sudo ufw allow $sshPort/tcp
+    #sudo ufw enable
+    #sudo ufw status
 
     # fail2ban
     sudo apt-get -y install fail2ban    
