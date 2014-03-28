@@ -36,7 +36,7 @@ if $doSetup ; then
 
     # nano + other apps for add-apt-repository cmd
     # http://stackoverflow.com/a/16032073
-    sudo apt-get -y install nano ufw
+    sudo apt-get -y install nano
     #WM python-software-properties software-properties-common
 
     # update time
@@ -74,6 +74,8 @@ if $doSetup ; then
     #TBC Firewall
     sudo apt-get install nmap
     nmap -v -sT localhost
+
+    #sudo apt-get -y install ufw
     #sudo ufw default deny incoming
     #sudo ufw default allow outgoing
     #sudo ufw logging on
